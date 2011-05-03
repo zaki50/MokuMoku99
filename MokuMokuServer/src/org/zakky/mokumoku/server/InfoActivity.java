@@ -1,5 +1,5 @@
 
-package org.zakky.mokumoku;
+package org.zakky.mokumoku.server;
 
 import java.io.IOException;
 import java.net.InetAddress;

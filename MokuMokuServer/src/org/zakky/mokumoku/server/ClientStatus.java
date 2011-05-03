@@ -1,4 +1,4 @@
-package org.zakky.mokumoku;
+package org.zakky.mokumoku.server;
 
 public final class ClientStatus {
     private final int mId;

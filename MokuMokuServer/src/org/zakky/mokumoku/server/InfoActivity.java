@@ -80,6 +80,7 @@ public class InfoActivity extends Activity {
                             if (k.isAcceptable()) {
                                 final ServerSocketChannel s = (ServerSocketChannel) k.channel();
                                 final SocketChannel clientSocket = s.accept();
+                                clientSocket.configureBlocking(false);
 
                                 publishProgress("waiting client");
 

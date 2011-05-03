@@ -2,7 +2,7 @@
 package org.zakky.mokumoku.server;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.Inet6Address;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
@@ -67,7 +67,7 @@ public class InfoActivity extends Activity {
                     serverSocket.configureBlocking(false);
 
                     final SocketAddress localSockAddr = new InetSocketAddress(
-                            InetAddress.getByName(null), 2525);
+                            Inet6Address.getByName("::"), 2525);
                     serverSocket.socket().bind(localSockAddr, 10);
 
                     serverSocket.register(selector, SelectionKey.OP_ACCEPT);

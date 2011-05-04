@@ -145,24 +145,6 @@ final class ServerThread extends Thread {
             Log.i(StatusServerService.TAG, "server thread finised.");
         }
     }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
 
     public void quit() {
         mQuit = true;
@@ -243,9 +225,6 @@ final class ServerThread extends Thread {
                     + buffer.remaining() + "(actual)");
         }
 
-        final ClientStatus clientStatus = new ClientStatus(clientId, buffer.array(),
-                buffer.arrayOffset() + buffer.position(), buffer.remaining());
-
         int openStatusIndex = -1;
         int prevStatusIndex = -1;
         int index = 0;
@@ -262,7 +241,8 @@ final class ServerThread extends Thread {
             }
             index++;
         }
-        if (prevStatusIndex == -1) {
+        final boolean isNew = (prevStatusIndex == -1);
+        if (isNew) {
             // new client
             if (openStatusIndex == -1) {
                 // クライアント数上限
@@ -272,7 +252,11 @@ final class ServerThread extends Thread {
             prevStatusIndex = openStatusIndex;
         }
 
-        mClients.set(prevStatusIndex, clientStatus);
+        if (isNew || length != 0) {
+            final ClientStatus clientStatus = new ClientStatus(clientId, buffer.array(),
+                    buffer.arrayOffset() + buffer.position(), buffer.remaining());
+            mClients.set(prevStatusIndex, clientStatus);
+        }
         return true;
     }
 

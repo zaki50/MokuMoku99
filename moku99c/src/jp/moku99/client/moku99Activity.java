@@ -49,8 +49,7 @@ public class moku99Activity extends Activity {
 		public void run() {
 			connect("127.0.0.1", 2525);
 			// TODO: 接続が失われた際の再接続方法をほどよく提供する必要がある
-			// int ret = load();
-			int ret = send("heeeeeeeelllo!!!");
+			int ret = load();
 			if (ret != 0) {
 				// loadの結果、自IDが一覧に含まれずエラー終了する(クライアント数上限の場合)など
 				Log.d("moku99", "connection failed. return code: " + ret);

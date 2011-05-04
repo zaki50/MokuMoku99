@@ -174,6 +174,11 @@ final class ServerThread extends Thread {
         try {
             s.read(mReceiveBuffer); // TODO 一回で読めるとは限らない
             mReceiveBuffer.flip();
+            if (mReceiveBuffer.remaining() < 8) {
+                key.cancel();
+                s.close();
+                return;
+            }
             mReceiveBuffer.order(ByteOrder.BIG_ENDIAN);
             final int clientId = mReceiveBuffer.getInt();
             final int length = mReceiveBuffer.getInt();

@@ -171,7 +171,6 @@ final class ServerThread extends Thread {
     private void handleWritable(SelectionKey key) {
         final Object attachment = key.attachment();
         if (attachment == null) {
-            key.cancel();
             return;
         }
         final ByteBuffer data = (ByteBuffer) attachment;
@@ -195,6 +194,9 @@ final class ServerThread extends Thread {
         try {
             s.read(mReceiveBuffer); // TODO 一回で読めるとは限らない
             mReceiveBuffer.flip();
+            if (mReceiveBuffer.remaining() == 0) {
+                return;
+            }
             if (mReceiveBuffer.remaining() < 8) {
                 key.cancel();
                 s.close();

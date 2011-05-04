@@ -26,12 +26,12 @@ public class moku99Activity extends Activity {
 	class Communicator implements Runnable {
 		static final int MAX_PACKET_SIZE = 104857600;
 		Socket clientSock;
-		byte[] myId;
-		HashMap<byte[], String> dataMap;
+		Integer myId;
+		HashMap<Integer, String> dataMap;
 
 		public Communicator() {
 			myId = genId();
-			dataMap = new HashMap<byte[], String>();
+			dataMap = new HashMap<Integer, String>();
 		}
 
 		/**
@@ -39,11 +39,9 @@ public class moku99Activity extends Activity {
 		 * 
 		 * @return String クライアントID
 		 */
-		public byte[] genId() {
+		public Integer genId() {
 			Random rnd = new Random();
-			ByteBuffer buf = ByteBuffer.allocate(4);
-			buf.putInt(rnd.nextInt());
-			return buf.array();
+			return rnd.nextInt();
 		}
 
 		public void run() {
@@ -127,7 +125,7 @@ public class moku99Activity extends Activity {
 				if (src.equals("")) {
 					// 空の特殊パターン
 					ByteBuffer buf = ByteBuffer.allocate(8);
-					buf.put(myId);
+					buf.putInt(myId.intValue());
 					buf.putInt(0);
 					writer.write(buf.array());
 				}
@@ -135,7 +133,7 @@ public class moku99Activity extends Activity {
 					// 通常メッセージ送信パターン
 					byte[] strBuf = src.getBytes();
 					ByteBuffer buf = ByteBuffer.allocate(8 + strBuf.length);
-					buf.put(myId);
+					buf.putInt(myId.intValue());
 					buf.putInt(strBuf.length);
 					buf.put(strBuf);
 					writer.write(buf.array());
@@ -180,14 +178,14 @@ public class moku99Activity extends Activity {
 				}
 				else {
 					// 継続してデータを読み取れるように、データオブジェクトの構築完了後にインスタンスを入れ替える
-					HashMap<byte[], String> tmpMap = new HashMap<byte[], String>();
+					HashMap<Integer, String> tmpMap = new HashMap<Integer, String>();
 					while (true) {
 						// レスポンスエントリのレイアウト:
 						// [クライアントID:4bytes][レスポンスサイズ:4bytes][レスポンスボディ:指定サイズ分]
 						int len = ByteBuffer.wrap(body, offset + 4, 4).getInt();
 						tmpMap.put(
-								ByteBuffer.wrap(body, offset, 4).array(),
-								new String(ByteBuffer.wrap(body, offset + 8, len).array())
+						        Integer.valueOf(ByteBuffer.wrap(body, offset, 4).getInt()),
+								new String(body, offset + 8, len)
 								);
 						offset += 8 + len;
 						if (offset == packetSize) {
@@ -213,8 +211,8 @@ public class moku99Activity extends Activity {
 		 */
 		public String dumpInfo() {
 			String ret = "";
-			for (Map.Entry<byte[], String> entry : dataMap.entrySet()) {
-				ret += Integer.toString(ByteBuffer.wrap(entry.getKey()).getInt()) + entry.getValue() + "\n";
+			for (Map.Entry<Integer, String> entry : dataMap.entrySet()) {
+				ret += Integer.toString(entry.getKey().intValue()) + entry.getValue() + "\n";
 			}
 			return ret;
 		}

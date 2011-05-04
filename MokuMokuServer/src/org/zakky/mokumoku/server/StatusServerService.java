@@ -185,7 +185,7 @@ final class ServerThread extends Thread {
         }
         if (data.remaining() == 0) {
             key.attach(null);
-            key.cancel();
+            key.interestOps(SelectionKey.OP_READ);
         }
     }
 
@@ -204,7 +204,7 @@ final class ServerThread extends Thread {
             final int clientId = mReceiveBuffer.getInt();
             final int length = mReceiveBuffer.getInt();
             updateClientStatus(clientId, length, mReceiveBuffer);
-            sendClientStatus(s);
+            sendClientStatus(key, s);
         } catch (IOException e) {
             Log.i(StatusServerService.TAG, "failed to read data from client.", e);
         }
@@ -260,7 +260,7 @@ final class ServerThread extends Thread {
         return true;
     }
 
-    private void sendClientStatus(SocketChannel socket) {
+    private void sendClientStatus(SelectionKey key, SocketChannel socket) {
         int totalLength = 4; // length(4)
         for (ClientStatus client : mClients) {
             totalLength += 8; // id(4) and length(4)
@@ -276,10 +276,7 @@ final class ServerThread extends Thread {
             buffer.put(client.getPayload());
         }
         buffer.flip();
-        try {
-            socket.register(mSelector, SelectionKey.OP_WRITE, buffer);
-        } catch (ClosedChannelException e) {
-            Log.i(StatusServerService.TAG, "socket closed.", e);
-        }
+        key.interestOps(SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+        key.attach(buffer);
     }
 }

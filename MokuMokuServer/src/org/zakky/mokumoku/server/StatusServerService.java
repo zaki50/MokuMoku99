@@ -155,6 +155,9 @@ final class ServerThread extends Thread {
         final ServerSocketChannel s = (ServerSocketChannel) key.channel();
         try {
             final SocketChannel clientSocket = s.accept();
+            if (clientSocket == null) {
+                return;
+            }
             clientSocket.configureBlocking(false);
 
             clientSocket.register(mSelector, SelectionKey.OP_READ);

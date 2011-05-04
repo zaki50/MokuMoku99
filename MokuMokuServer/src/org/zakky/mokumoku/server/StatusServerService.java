@@ -262,7 +262,7 @@ final class ServerThread extends Thread {
         return true;
     }
 
-    private void sendClientStatus(SelectionKey key, SocketChannel socket) {
+    private void sendClientStatus(SelectionKey key, SocketChannel socket) throws IOException {
         int totalLength = 4; // length(4)
         for (ClientStatus client : mClients) {
             totalLength += 8; // id(4) and length(4)
@@ -278,7 +278,10 @@ final class ServerThread extends Thread {
             buffer.put(client.getPayload());
         }
         buffer.flip();
-        key.interestOps(SelectionKey.OP_WRITE | SelectionKey.OP_READ);
-        key.attach(buffer);
+        socket.write(buffer);
+        if (buffer.hasRemaining()) {
+            key.interestOps(SelectionKey.OP_WRITE | SelectionKey.OP_READ);
+            key.attach(buffer);
+        }
     }
 }

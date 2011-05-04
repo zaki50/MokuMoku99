@@ -47,7 +47,7 @@ public class moku99Activity extends Activity {
 		}
 
 		public void run() {
-			connect("192.168.117.2", 10099);
+			connect("127.0.0.1", 2525);
 			// TODO: 接続が失われた際の再接続方法をほどよく提供する必要がある
 			int ret = load();
 			if (ret != 0) {
@@ -172,7 +172,7 @@ public class moku99Activity extends Activity {
 					return -2;
 				}
 				byte[] body = new byte[packetSize];
-				reader.read(size, 0, packetSize);
+				reader.read(body, 0, packetSize);
 				
 				int offset = 0;
 				// 継続してデータを読み取れるように、データオブジェクトの構築完了後にインスタンスを入れ替える

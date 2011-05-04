@@ -49,7 +49,8 @@ public class moku99Activity extends Activity {
 		public void run() {
 			connect("127.0.0.1", 2525);
 			// TODO: 接続が失われた際の再接続方法をほどよく提供する必要がある
-			int ret = load();
+			// int ret = load();
+			int ret = send("heeeeeeeelllo!!!");
 			if (ret != 0) {
 				// loadの結果、自IDが一覧に含まれずエラー終了する(クライアント数上限の場合)など
 				Log.d("moku99", "connection failed. return code: " + ret);
@@ -175,24 +176,30 @@ public class moku99Activity extends Activity {
 				reader.read(body, 0, packetSize);
 				
 				int offset = 0;
-				// 継続してデータを読み取れるように、データオブジェクトの構築完了後にインスタンスを入れ替える
-				HashMap<byte[], String> tmpMap = new HashMap<byte[], String>();
-				while (true) {
-					// レスポンスエントリのレイアウト:
-					// [クライアントID:4bytes][レスポンスサイズ:4bytes][レスポンスボディ:指定サイズ分]
-					int len = ByteBuffer.wrap(body, offset + 4, 4).getInt();
-					tmpMap.put(
-							ByteBuffer.wrap(body, offset, 4).array(),
-							new String(ByteBuffer.wrap(body, offset + 8, len).array())
-							);
-					if (offset + 8 + len == packetSize) {
-						break;
+				if (packetSize == 0) {
+					dataMap.clear();
+				}
+				else {
+					// 継続してデータを読み取れるように、データオブジェクトの構築完了後にインスタンスを入れ替える
+					HashMap<byte[], String> tmpMap = new HashMap<byte[], String>();
+					while (true) {
+						// レスポンスエントリのレイアウト:
+						// [クライアントID:4bytes][レスポンスサイズ:4bytes][レスポンスボディ:指定サイズ分]
+						int len = ByteBuffer.wrap(body, offset + 4, 4).getInt();
+						tmpMap.put(
+								ByteBuffer.wrap(body, offset, 4).array(),
+								new String(ByteBuffer.wrap(body, offset + 8, len).array())
+								);
+						offset += 8 + len;
+						if (offset == packetSize) {
+							break;
+						}
 					}
+					if (tmpMap.containsKey(myId) == false) {
+						return -3;
+					}
+					dataMap = tmpMap;
 				}
-				if (tmpMap.containsKey(myId) == false) {
-					return -3;
-				}
-				dataMap = tmpMap;
 			} catch (IOException e) {
 				e.printStackTrace();
 				return -1;

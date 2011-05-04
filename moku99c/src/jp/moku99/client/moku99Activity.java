@@ -94,7 +94,7 @@ public class moku99Activity extends Activity {
 		 * @return 正常終了時は0。サーバへの接続が失われていれば-4。接続数上限等で自クライアント情報が含まれなければ-3
 		 */
 		public int send(String src) {
-			if (sendPacket("") == 0) {
+			if (sendPacket(src) == 0) {
 				return readInfo();
 			}
 			else {
@@ -214,7 +214,7 @@ public class moku99Activity extends Activity {
 		public String dumpInfo() {
 			String ret = "";
 			for (Map.Entry<byte[], String> entry : dataMap.entrySet()) {
-				ret += new String(entry.getKey()) + entry.getValue() + "\n";
+				ret += Integer.toString(ByteBuffer.wrap(entry.getKey()).getInt()) + entry.getValue() + "\n";
 			}
 			return ret;
 		}

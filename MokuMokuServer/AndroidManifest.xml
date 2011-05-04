@@ -15,5 +15,6 @@
             </intent-filter>
         </activity>
 
+		<service android:name=".StatusServerService" />
     </application>
 </manifest>

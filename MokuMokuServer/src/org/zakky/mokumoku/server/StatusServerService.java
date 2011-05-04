@@ -32,7 +32,7 @@ public class StatusServerService extends Service {
 
     private static final int BACKLOG = 10;
 
-    //private int mStartId = -1;
+    // private int mStartId = -1;
 
     private ServerThread mServerThread;
 
@@ -123,13 +123,13 @@ final class ServerThread extends Thread {
             while (!mQuit) {
                 mSelector.select();
                 for (SelectionKey key : mSelector.selectedKeys()) {
-                    if (key.isAcceptable()) {
+                    if (key.isValid() && key.isAcceptable()) {
                         handleAcceptable(key);
                     }
-                    if (key.isWritable()) {
+                    if (key.isValid() && key.isWritable()) {
                         handleWritable(key);
                     }
-                    if (key.isReadable()) {
+                    if (key.isValid() && key.isReadable()) {
                         handleReadable(key);
                     }
                 }
@@ -145,6 +145,24 @@ final class ServerThread extends Thread {
             Log.i(StatusServerService.TAG, "server thread finised.");
         }
     }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
     public void quit() {
         mQuit = true;
@@ -169,6 +187,24 @@ final class ServerThread extends Thread {
     }
 
     private void handleWritable(SelectionKey key) {
+        final Object attachment = key.attachment();
+        if (attachment == null) {
+            key.cancel();
+            return;
+        }
+        final ByteBuffer data = (ByteBuffer) attachment;
+        if (0 < data.remaining()) {
+            final SocketChannel socket = (SocketChannel) key.channel();
+            try {
+                socket.write(data);
+            } catch (IOException e) {
+                Log.e(StatusServerService.TAG, "failed to send data.", e);
+            }
+        }
+        if (data.remaining() == 0) {
+            key.attach(null);
+            key.cancel();
+        }
     }
 
     private void handleReadable(SelectionKey key) {
@@ -185,9 +221,7 @@ final class ServerThread extends Thread {
             mReceiveBuffer.order(ByteOrder.BIG_ENDIAN);
             final int clientId = mReceiveBuffer.getInt();
             final int length = mReceiveBuffer.getInt();
-            if (0 < length) {
-                updateClientStatus(clientId, length, mReceiveBuffer);
-            }
+            updateClientStatus(clientId, length, mReceiveBuffer);
             sendClientStatus(s);
         } catch (IOException e) {
             Log.i(StatusServerService.TAG, "failed to read data from client.", e);
@@ -259,7 +293,7 @@ final class ServerThread extends Thread {
         }
         buffer.flip();
         try {
-            socket.register(mSelector, SelectionKey.OP_READ | SelectionKey.OP_WRITE, buffer);
+            socket.register(mSelector, SelectionKey.OP_WRITE, buffer);
         } catch (ClosedChannelException e) {
             Log.i(StatusServerService.TAG, "socket closed.", e);
         }
